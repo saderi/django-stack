@@ -8,7 +8,7 @@ services:
     volumes:
       - ${YOUR_PROJECT_PATH:-./html}:/var/www/html
     environment:
-      - WEBROOT=/var/www/html/www/html
+      - WEBROOT=/var/www/html/html
     ports:
       - '80:80'
     depends_on:
