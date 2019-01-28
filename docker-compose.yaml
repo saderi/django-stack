@@ -1,0 +1,70 @@
+version: '3.5'
+
+services:
+  # |-|-| web_server container |-|-|
+  web_server:
+    container_name: web_server
+    image: saderi/lemmpn:5.6
+    volumes:
+      - ${YOUR_PROJECT_PATH:-./html}:/var/www/html
+    environment:
+      - WEBROOT=/var/www/html/www/html
+    ports:
+      - '80:80'
+    depends_on:
+      - mysql_server
+    networks:
+      - my-stack-network
+    restart: always
+
+  django:
+    container_name: django
+    build: .
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes:
+      - ${DJANGO_APP:-./django}:/code
+    ports:
+      - "8000:8000"
+    depends_on:
+      - mysql_server
+    networks:
+      - my-stack-network
+    restart: always
+
+  ################################
+  # |-|-| Database container |-|-|
+  ################################
+
+  # |-|-| mysql container |-|-|
+  mysql_server:
+    container_name: mysql_server
+    image: mariadb:${MARIADB_VERSION:-10.2.21}
+    hostname: mariadbdev
+    networks:
+      - my-stack-network
+    volumes:
+      - ${MYSQL_DATA_PATH:-mysql}:/var/lib/mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=${MYSQL_ROOT_PASSWORD:-root}
+    restart: always
+
+  # |-|-| phpMyAdmin container |-|-|
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin/phpmyadmin
+    environment:
+     - PMA_ARBITRARY=1
+    restart: always
+    ports:
+     - ${PHPMYADMIN_ACCESS_PORT:-8086}:80
+    networks:
+      - my-stack-network
+    restart: always
+
+networks:
+  my-stack-network:
+   name: ${NETWORK_NAME:-my-stack-network}
+
+volumes:
+    mysql:
+    mongodb:
